@@ -16,5 +16,5 @@
 
 1. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/ваш_username/food-additives-catalog.git
+git clone https://github.com/Tikhon-git-hub/ProjectWeb.git
 cd food-additives-catalog
