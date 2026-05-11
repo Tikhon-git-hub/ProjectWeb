@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Избранное{% endblock %}
+{% block content %}
+<h1 class="mb-4">❤️ Мои избранные добавки</h1>
+
+{% if additives %}
+<div class="row">
+    {% for additive in additives %}
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h5>{{ additive.code }} - {{ additive.name }}</h5>
+                    <form action="{{ url_for('toggle_favorite', additive_id=additive.id) }}" method="post">
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i> Удалить
+                        </button>
+                    </form>
+                </div>
+                <p class="text-muted">{{ additive.category_ru }}</p>
+                <a href="{{ url_for('additive_detail', code=additive.code) }}" class="btn btn-sm btn-primary">
+                    Подробнее
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i> У вас пока нет избранных добавок.
+    <a href="{{ url_for('additives_list') }}">Добавьте их!</a>
+</div>
+{% endif %}
+{% endblock %}

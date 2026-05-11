@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Редактировать добавку {{ additive.code }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h2 class="mb-0">
+                        <i class="fas fa-edit"></i> Редактирование добавки {{ additive.code }}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.code.label(class="form-label") }}
+                            {{ form.code(class="form-control", placeholder="E100") }}
+                            <small class="form-text text-muted">Код добавки (обязательно)</small>
+                            {% for error in form.code.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control", placeholder="Куркумин") }}
+                            {% for error in form.name.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.name_en.label(class="form-label") }}
+                            {{ form.name_en(class="form-control", placeholder="Curcumin") }}
+                            <small class="form-text text-muted">Необязательное поле</small>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.category.label(class="form-label") }}
+                                {{ form.category(class="form-select") }}
+                                {% for error in form.category.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.status.label(class="form-label") }}
+                                {{ form.status(class="form-select") }}
+                                {% for error in form.status.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.hazard_level.label(class="form-label") }}
+                                {{ form.hazard_level(class="form-select") }}
+                                {% for error in form.hazard_level.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.image.label(class="form-label") }}
+                                {{ form.image(class="form-control") }}
+                                {% if additive.image_filename %}
+                                    <div class="mt-2">
+                                        <small class="text-muted">Текущее изображение:</small>
+                                        <img src="{{ url_for('static', filename='uploads/' + additive.image_filename) }}"
+                                             alt="{{ additive.code }}" style="max-height: 100px;" class="mt-1">
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Загрузите новое изображение, чтобы заменить текущее</small>
+                                {% for error in form.image.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows="3") }}
+                            {% for error in form.description.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.effect_on_health.label(class="form-label") }}
+                            {{ form.effect_on_health(class="form-control", rows="3") }}
+                            {% for error in form.effect_on_health.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.daily_intake.label(class="form-label") }}
+                            {{ form.daily_intake(class="form-control") }}
+                            {% for error in form.daily_intake.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.foods_contain.label(class="form-label") }}
+                            {{ form.foods_contain(class="form-control", rows="2") }}
+                            {% for error in form.foods_contain.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('additive_detail', code=additive.code) }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Отмена
+                            </a>
+                            {{ form.submit(class="btn btn-warning", value="Обновить") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

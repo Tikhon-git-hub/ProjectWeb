@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Список добавок{% endblock %}
+{% block content %}
+<h1 class="mb-4">📋 Все пищевые добавки</h1>
+
+<!-- Фильтры -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control"
+                       placeholder="Поиск по коду или названию" value="{{ search_query }}">
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">Все категории</option>
+                    <option value="color" {% if category == 'color' %}selected{% endif %}>Красители</option>
+                    <option value="preservative" {% if category == 'preservative' %}selected{% endif %}>Консерванты</option>
+                    <option value="antioxidant" {% if category == 'antioxidant' %}selected{% endif %}>Антиоксиданты</option>
+                    <option value="sweetener" {% if category == 'sweetener' %}selected{% endif %}>Подсластители</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">Все статусы</option>
+                    <option value="safe" {% if status == 'safe' %}selected{% endif %}>Безопасные</option>
+                    <option value="caution" {% if status == 'caution' %}selected{% endif %}>С осторожностью</option>
+                    <option value="dangerous" {% if status == 'dangerous' %}selected{% endif %}>Опасные</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Применить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Список добавок -->
+<div class="row">
+    {% for additive in additives %}
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5 class="card-title">
+                        {{ additive.code }} - {{ additive.name }}
+                        {% if additive.status == 'safe' %}
+                            <span class="badge bg-success">Безопасно</span>
+                        {% elif additive.status == 'caution' %}
+                            <span class="badge bg-warning">С осторожностью</span>
+                        {% else %}
+                            <span class="badge bg-danger">Опасно</span>
+                        {% endif %}
+                    </h5>
+                    {% if current_user.is_authenticated %}
+                    <form action="{{ url_for('toggle_favorite', additive_id=additive.id) }}" method="post">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                <p class="card-text">{{ additive.description[:150] }}...</p>
+                <a href="{{ url_for('additive_detail', code=additive.code) }}" class="btn btn-sm btn-outline-primary">
+                    Подробнее
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if pagination.pages > 1 %}
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if pagination.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ pagination.prev_num }}&search={{ search_query }}&category={{ category }}&status={{ status }}">←</a>
+        </li>
+        {% endif %}
+
+        <li class="page-item active"><span class="page-link">{{ pagination.page }}</span></li>
+
+        {% if pagination.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ pagination.next_num }}&search={{ search_query }}&category={{ category }}&status={{ status }}">→</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

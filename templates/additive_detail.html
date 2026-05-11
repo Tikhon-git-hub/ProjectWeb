@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}{{ additive.code }} - {{ additive.name }} | E-Коды{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Ваши стили */
+    .similar-additive {
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    .similar-additive:hover {
+        transform: translateX(5px);
+        background-color: #e9ecef;
+    }
+    /* Остальные стили... */
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Хлебные крошки -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Главная</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('additives_list') }}">Все добавки</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ additive.code }}</li>
+                </ol>
+            </nav>
+
+            <!-- Основная карточка с информацией -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h1 class="h3 mb-0">
+                            {{ additive.code }} - {{ additive.name }}
+                            {% if additive.name_en %}
+                                <small class="text-light">({{ additive.name_en }})</small>
+                            {% endif %}
+                        </h1>
+
+                        <!-- Кнопка избранного -->
+                        <form action="{{ url_for('toggle_favorite', additive_id=additive.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-outline-light"
+                                    title="{% if is_favorited %}Удалить из избранного{% else %}Добавить в избранное{% endif %}">
+                                <i class="fas fa-heart {% if is_favorited %}text-danger{% endif %}"></i>
+                                {% if is_favorited %}
+                                    В избранном
+                                {% else %}
+                                    В избранное
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Кнопки действий для авторизованных пользователей -->
+                    {% if current_user.is_authenticated %}
+                    <div class="mb-4">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> Вы можете управлять этой добавкой
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{{ url_for('edit_additive', code=additive.code) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </a>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="fas fa-trash"></i> Удалить
+                            </button>
+                        </div>
+                        <hr>
+                    </div>
+                    {% endif %}
+
+                    <!-- Статус и уровень опасности -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Статус безопасности:</h5>
+                            {% if additive.status == 'safe' %}
+                                <span class="badge bg-success" style="font-size: 1.1rem; padding: 10px 20px;">
+                                    <i class="fas fa-check-circle"></i> Безопасная
+                                </span>
+                            {% elif additive.status == 'caution' %}
+                                <span class="badge bg-warning text-dark" style="font-size: 1.1rem; padding: 10px 20px;">
+                                    <i class="fas fa-exclamation-triangle"></i> Требует осторожности
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger" style="font-size: 1.1rem; padding: 10px 20px;">
+                                    <i class="fas fa-skull-crossbones"></i> Опасная
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5>Уровень опасности:</h5>
+                            <div class="progress" style="height: 30px;">
+                                <div class="progress-bar {% if additive.hazard_level <= 1 %}bg-success{% elif additive.hazard_level <= 3 %}bg-warning{% else %}bg-danger{% endif %}"
+                                     role="progressbar"
+                                     style="width: {{ additive.hazard_level * 20 }}%;"
+                                     aria-valuenow="{{ additive.hazard_level }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="5">
+                                    {{ additive.hazard_level }} / 5
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Остальные секции с информацией -->
+                    <div class="detail-section">
+                        <h5><i class="fas fa-tag"></i> Категория:</h5>
+                        <p>{{ additive.category_ru }}</p>
+                    </div>
+
+                    {% if additive.description %}
+                    <div class="detail-section">
+                        <h5><i class="fas fa-info-circle"></i> Описание:</h5>
+                        <p>{{ additive.description }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if additive.effect_on_health %}
+                    <div class="detail-section">
+                        <h5><i class="fas fa-heartbeat"></i> Влияние на здоровье:</h5>
+                        <p>{{ additive.effect_on_health }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if additive.daily_intake %}
+                    <div class="detail-section">
+                        <h5><i class="fas fa-calculator"></i> Допустимая суточная доза (ADI):</h5>
+                        <p>{{ additive.daily_intake }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if additive.foods_contain %}
+                    <div class="detail-section">
+                        <h5><i class="fas fa-utensils"></i> Где содержится:</h5>
+                        <p>{{ additive.foods_contain }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Изображение -->
+            {% if additive.image_filename %}
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-image"></i> Изображение</h5>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ url_for('static', filename='uploads/' + additive.image_filename) }}"
+                         alt="{{ additive.code }} - {{ additive.name }}"
+                         class="img-fluid rounded">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Быстрая информация -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Краткая информация</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><strong><i class="fas fa-barcode"></i> Код:</strong> {{ additive.code }}</li>
+                        <li class="mb-2"><strong><i class="fas fa-language"></i> Название:</strong> {{ additive.name }}</li>
+                        {% if additive.name_en %}
+                        <li class="mb-2"><strong><i class="fas fa-globe"></i> Англ. название:</strong> {{ additive.name_en }}</li>
+                        {% endif %}
+                        <li class="mb-2"><strong><i class="fas fa-tag"></i> Категория:</strong> {{ additive.category_ru }}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Похожие добавки -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Похожие добавки</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% if similar_additives %}
+                            {% for similar_additive in similar_additives %}
+                            <a href="{{ url_for('additive_detail', code=similar_additive.code) }}"
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ similar_additive.code }}</strong><br>
+                                        <small>{{ similar_additive.name }}</small>
+                                    </div>
+                                    <span class="badge {% if similar_additive.status == 'safe' %}bg-success{% elif similar_additive.status == 'caution' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                        {{ similar_additive.status_ru }}
+                                    </span>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center mb-0">Нет похожих добавок</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+{% if current_user.is_authenticated %}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Подтверждение удаления
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы действительно хотите удалить добавку <strong>{{ additive.code }} - {{ additive.name }}</strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>Внимание!</strong> Это действие нельзя отменить!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form action="{{ url_for('delete_additive', code=additive.code) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">Да, удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    function copyToClipboard() {
+        navigator.clipboard.writeText(window.location.href).then(function() {
+            const notification = document.createElement('div');
+            notification.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
+            notification.style.zIndex = '1050';
+            notification.innerHTML = '<i class="fas fa-check-circle"></i> Ссылка скопирована!';
+            document.body.appendChild(notification);
+            setTimeout(function() { notification.remove(); }, 2000);
+        });
+    }
+</script>
+{% endblock %}

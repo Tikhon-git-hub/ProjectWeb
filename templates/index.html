@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Главная - Пищевые добавки{% endblock %}
+{% block content %}
+<div class="bg-light p-5 rounded-3 mb-4">
+    <h1 class="display-4">🍽️ Каталог пищевых добавок</h1>
+    <p class="lead">Узнайте всё о E-кодах: какие безопасны, а каких стоит избегать.</p>
+    <hr class="my-4">
+    <p>База данных содержит информацию о пищевых добавках с подробными описаниями.</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('additives_list') }}" role="button">
+        <i class="fas fa-search"></i> Найти добавку
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="card-title">{{ total_additives }}</h3>
+                <p class="card-text">Всего добавок</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h3 class="card-title text-success">{{ safe_count }}</h3>
+                <p class="card-text">Безопасные ✅</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center border-danger">
+            <div class="card-body">
+                <h3 class="card-title text-danger">{{ dangerous_count }}</h3>
+                <p class="card-text">Опасные ❌</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if recent_additives %}
+<h3 class="mb-3">🆕 Недавно добавленные</h3>
+<div class="row mb-5">
+    {% for additive in recent_additives %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ additive.code }} - {{ additive.name }}</h5>
+                <p class="card-text">{{ additive.description[:100] }}...</p>
+                <a href="{{ url_for('additive_detail', code=additive.code) }}" class="btn btn-sm btn-primary">Подробнее</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
